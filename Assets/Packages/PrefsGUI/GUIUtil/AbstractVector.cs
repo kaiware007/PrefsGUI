@@ -19,6 +19,7 @@ public class AbstractVector
         { typeof(Vector4), new Data() { rank = 4 } },
         { typeof(Vector2Int), new Data(){rank = 2} },
         { typeof(Vector3Int), new Data(){rank = 3} },
+        { typeof(Color), new Data(){rank = 4} },
     };
 
     static AbstractVector()

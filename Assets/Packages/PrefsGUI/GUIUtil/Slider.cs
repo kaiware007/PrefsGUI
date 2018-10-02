@@ -103,7 +103,50 @@ public static partial class GUIUtil
 		return v;
 	}
 
-	static readonly Dictionary<Type, SliderFunc> _typeSliderFuncTable = new Dictionary<Type, SliderFunc>()
+    static readonly string[] defaultElemLabelsColor = new[] { "H", "S", "V", "A" };
+    static object SliderFuncColor<T, ElemType>(object v, object min, object max, ref string unparsedStr, string label = "", string[] elemLabels = null)
+    {
+        var vec = new AbstractVector(v);
+        
+        var elementNum = vec.GetElementNum();
+        var eLabels = elemLabels ?? defaultElemLabelsColor;
+
+        Vector4 v4 = default(Vector4);
+        Color c = new Color((float)vec[0], (float)vec[1], (float)vec[2], (float)vec[3]);
+        Color.RGBToHSV(c, out v4.x, out v4.y, out v4.z);
+        v4.w = c.a;
+
+        using (var h0 = new GUILayout.HorizontalScope())
+        {
+            if (!string.IsNullOrEmpty(label)) GUILayout.Label(label);
+
+            using (var vertical = new GUILayout.VerticalScope())
+            {
+
+                var strs = SplitUnparsedStr(unparsedStr, elementNum);
+                for (var i = 0; i < 4; ++i)
+                {
+                    using (var h1 = new GUILayout.HorizontalScope())
+                    {
+                        var elem = Slider(v4[i], 0, 1, ref strs[i], eLabels[i]);
+                        v4[i] = elem;
+                    }
+                }
+                unparsedStr = JoinUnparsedStr(strs);
+            }
+
+            using (var cs = new GUIUtil.ColorScope(c))
+            {
+                GUILayout.Label("■■■");
+            }
+        }
+
+        var col = Color.HSVToRGB(v4[0], v4[1], v4[2]);
+        col.a = v4[3];
+        return col;
+    }
+
+    static readonly Dictionary<Type, SliderFunc> _typeSliderFuncTable = new Dictionary<Type, SliderFunc>()
 	{
 		{typeof(int), SliderInt },
 		{typeof(float), SliderFloat },
@@ -113,6 +156,7 @@ public static partial class GUIUtil
 		{typeof(Vector4), SliderFuncVector<Vector4, float> },
         {typeof(Vector2Int), SliderFuncVector<Vector2Int, int> },
         {typeof(Vector3Int), SliderFuncVector<Vector3Int, int> },
+        {typeof(Color), SliderFuncColor<Color, float> },
     };
 
 	#endregion
